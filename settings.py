@@ -3,6 +3,8 @@ region = 'euw1'
 queueId = 420
 seasonId = 18  # Hmm, wasn't able to find a way to get this
 ugg_base_url = "https://u.gg/api"
+number_of_summoners = 35_000
+max_page_number = round(number_of_summoners / 100, 0) + 1
 
 
 # FILEPATHS
