@@ -39,16 +39,17 @@ def download_summoner_names(session, ugg_base_url, queueId, region):
 
     # This will take about an hour to complete
     # Lets pull the summoner names from the first 350 pages of the leaderboard on u.gg
-    print('Downloading summoner`s profile data.')
-    for n in tqdm(range(last_page_number, max_page_number)):
-        # Print the page number in-case of an interruption happens, so that we can manually edit this file and resume downloading
-        r = session.post(ugg_base_url, json=leaderboard_req_body(n))
-        current_data = r.json()
-        data.append(current_data)
-        with open(summoners_filepath, 'w') as writer:
-            json.dump(data, writer, indent=4)
-        with open(last_page_number_filepath, 'w') as writer:
-            writer.write(str(n))
-        sleep(0.75)
+    if last_page_number < max_page_number:
+        print('Downloading summoner`s profile data.')
+        for n in tqdm(range(last_page_number, max_page_number)):
+            # Print the page number in-case of an interruption happens, so that we can manually edit this file and resume downloading
+            r = session.post(ugg_base_url, json=leaderboard_req_body(n))
+            current_data = r.json()
+            data.append(current_data)
+            with open(summoners_filepath, 'w') as writer:
+                json.dump(data, writer, indent=4)
+            with open(last_page_number_filepath, 'w') as writer:
+                writer.write(str(n))
+            sleep(0.75)
 
-    print('\nDONE: downloading summoner`s profile data.')
+        print('\nDONE: downloading summoner`s profile data.')
