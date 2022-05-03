@@ -29,7 +29,7 @@ def download_summoner_names(session, ugg_base_url, queueId, region):
             last_page_number = int(reader.read())
             # Because of the way python's range function works, add one to the last_page_number so it skips downloading
             # the same data as before
-            if last_page_number == max_page_number:
+            if last_page_number == max_page_number - 1:
                 last_page_number = last_page_number + 1
     else:
         # Does not need to be a set,
@@ -51,4 +51,4 @@ def download_summoner_names(session, ugg_base_url, queueId, region):
             writer.write(str(n))
         sleep(0.75)
 
-    print('DONE: downloading summoner`s profile data.')
+    print('\nDONE: downloading summoner`s profile data.')
