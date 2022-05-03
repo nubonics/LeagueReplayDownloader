@@ -19,6 +19,7 @@
 ### Installation
 
 - `pip install -requirements.txt` 
+- edit `settings.py` according to your preference
 
 ### Usage
 
@@ -31,3 +32,9 @@
 
 ### Disclaimer
 - This project is not affiliated with Riot Games in any way.
+
+
+### Roadmap
+
+- add program shutdown/exit on the condition of not enough disk space
+- add resume support to downloading match id`s
