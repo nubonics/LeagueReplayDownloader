@@ -2,7 +2,7 @@ import asyncio
 
 from requests import Session
 
-from modules.get_match_ids import download_match_ids
+from modules.download_match_ids import download_match_ids
 # from modules.get_latest_patch_version import get_latest_patch_version
 from obsolete_data.download_summoner_names import download_summoner_names
 from settings import ugg_base_url, queueId, region, seasonId

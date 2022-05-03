@@ -32,11 +32,16 @@ def download_match_ids(session, ugg_base_url, region, queueId, seasonId):
         "Content-Type": "application/json"
     }
 
+    print('Downloading match id`s from high ranking summoners who have played our selected champion within the past 20 games.')
+
     # Ug, how long is this going to take? LMK tqdm
     for sN in tqdm(load_summoner_names()):
-        response = session.post(url=ugg_base_url, data=matches_req_body(sN))
+        response = session.post(url=ugg_base_url, json=matches_req_body(sN))
         data = response.json()
-        matches = data["data"]["fetchPlayerMatchSummaries"]["matchSummaries"]
+        try:
+            matches = data["data"]["fetchPlayerMatchSummaries"]["matchSummaries"]
+        except TypeError:
+            continue
         for match in matches:
             # According to data-dragon, match data is stored for 2 years
             # Doesn't make much sense to have a version `key`
@@ -49,4 +54,6 @@ def download_match_ids(session, ugg_base_url, region, queueId, seasonId):
             data = list(match_ids)
             json.dump(data, writer, indent=4)
 
-        sleep(0.5)
+        sleep(0.75)
+
+    print('DONE: download match id`s.')
