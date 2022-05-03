@@ -1,6 +1,10 @@
 # LeagueReplayDownloader
 
 
+### Contact
+
+- Feel free to message me on discord regarding this project `nubonix#3648`
+
 ### WARNING:
 - This program does not know when the disk is full.
 
