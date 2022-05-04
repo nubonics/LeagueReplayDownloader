@@ -54,6 +54,6 @@ def download_match_ids(session, ugg_base_url, region, queueId, seasonId):
             data = list(match_ids)
             json.dump(data, writer, indent=4)
 
-        sleep(0.75)
+        sleep(5)
 
     print('DONE: download match id`s.')
