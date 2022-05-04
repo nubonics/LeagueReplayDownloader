@@ -11,7 +11,7 @@ async def download_replays():
     tps_bucket = TPSBucket(expected_tps=16)
     tps_bucket.start()
 
-    lockfile_data = get_lockfile_data()
+    lockfile_data = await get_lockfile_data()
     port = lockfile_data['app-port']
     remote_auth_token = lockfile_data['remoting-auth-token']
 
@@ -21,6 +21,9 @@ async def download_replays():
     try:
         while True:
             if tps_bucket.get_token():
-                await download_single_replay(gameId=next(match_ids), port=port, remote_auth_token=remote_auth_token)
-    except:
+                gameId = next(match_ids)
+                print(f'GameID: {str(gameId)}')
+                await download_single_replay(gameId=gameId, port=port, remote_auth_token=remote_auth_token)
+    except Exception as e:
+        print(e)
         pass
