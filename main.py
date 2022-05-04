@@ -4,6 +4,7 @@ from requests import Session
 
 from modules.download_match_ids import download_match_ids
 # from modules.get_latest_patch_version import get_latest_patch_version
+from modules.download_replays import download_replays
 from modules.download_summoner_names import download_summoner_names
 from settings import ugg_base_url, queueId, region, seasonId
 
@@ -40,8 +41,9 @@ async def main():
 
     # This is not needed, as I am not filtering by version
     # current_version = get_latest_patch_version(session=session)
-    download_summoner_names(session=session, ugg_base_url=ugg_base_url, queueId=queueId, region=region)
-    download_match_ids(session=session, ugg_base_url=ugg_base_url, queueId=queueId, region=region, seasonId=seasonId)
+    # download_summoner_names(session=session, ugg_base_url=ugg_base_url, queueId=queueId, region=region)
+    # download_match_ids(session=session, ugg_base_url=ugg_base_url, queueId=queueId, region=region, seasonId=seasonId)
+    await download_replays()
 
 
 if __name__ == '__main__':
