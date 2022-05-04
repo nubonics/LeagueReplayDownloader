@@ -15,13 +15,11 @@ class TPSBucket:
 
     def refill_bucket_per_second(self):
         while True:
-            print("refill")
             self.refill_bucket()
             time.sleep(1)
 
     def refill_bucket(self):
         self.number_of_tokens.value = self.expected_tps
-        print('bucket count after refill', self.number_of_tokens)
 
     def start(self):
         self.bucket_refresh_process.start()
