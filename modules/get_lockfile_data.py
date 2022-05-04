@@ -19,7 +19,7 @@ def find_lcu_process():
     return None
 
 
-def get_lockfile_data():
+async def get_lockfile_data():
     while True:
         process = find_lcu_process()
         if process is not None:
@@ -27,5 +27,6 @@ def get_lockfile_data():
             data = parse_cmdline_args(cmdline_args=raw_data)
             return data
 
+        print('Waiting for the League client to be open...')
         # Let's be nice to the cpu
         sleep(1)
