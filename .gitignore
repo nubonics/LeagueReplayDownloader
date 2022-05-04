@@ -1,2 +1,7 @@
 # Project exclude paths
 /obsolete_data/
+/data/last_page_number.txt
+/data/raw_match_ids.json
+/data/summoners.json
+/data/match_ids.json
+/data/summoner_names.json
