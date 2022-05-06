@@ -1,10 +1,9 @@
 import json
 from time import sleep
-from tqdm import tqdm
 
 from modules.load_champ_ids import load_champ_ids
-from modules.load_summoner_names import load_summoner_names
-from settings import match_ids_filepath, champion_s
+from modules.summoner_name_generator import summoner_name_generator
+from settings import match_ids_filepath, champion_s, last_summoner_filepath
 
 
 def download_match_ids(session, ugg_base_url, region, queueId, seasonId):
@@ -34,26 +33,35 @@ def download_match_ids(session, ugg_base_url, region, queueId, seasonId):
 
     print('Downloading match id`s from high ranking summoners who have played our selected champion within the past 20 games.')
 
-    # Ug, how long is this going to take? LMK tqdm
-    for sN in tqdm(load_summoner_names()):
-        response = session.post(url=ugg_base_url, json=matches_req_body(sN))
-        data = response.json()
-        try:
-            matches = data["data"]["fetchPlayerMatchSummaries"]["matchSummaries"]
-        except TypeError:
-            continue
-        for match in matches:
-            # According to data-dragon, match data is stored for 2 years
-            # Doesn't make much sense to have a version `key`
-            #   if the only version accessible for downloading is the current one
-            match_id = match["matchId"]
-            match_ids.add(match_id)
+    summoner_names = summoner_name_generator()
 
-        # Re-write the raw_match_ids data for every group / summoner name
-        with open(match_ids_filepath, 'w') as writer:
-            data = list(match_ids)
-            json.dump(data, writer, indent=4)
+    try:
+        while True:
+            # Ug, how long is this going to take? LMK tqdm
+            sN = next(summoner_names)
+            response = session.post(url=ugg_base_url, json=matches_req_body(sN))
+            data = response.json()
+            try:
+                matches = data["data"]["fetchPlayerMatchSummaries"]["matchSummaries"]
+            except TypeError:
+                continue
+            for match in matches:
+                # According to data-dragon, match data is stored for 2 years
+                # Doesn't make much sense to have a version `key`
+                #   if the only version accessible for downloading is the current one
+                match_id = match["matchId"]
+                match_ids.add(match_id)
 
-        sleep(5)
+            with open(last_summoner_filepath, 'w') as writer:
+                writer.write(str(sN))
+
+            # Re-write the raw_match_ids data for every group / summoner name
+            with open(match_ids_filepath, 'w') as writer:
+                data = list(match_ids)
+                json.dump(data, writer, indent=4)
+
+            sleep(1)
+    except:
+        pass
 
     print('DONE: download match id`s.')
