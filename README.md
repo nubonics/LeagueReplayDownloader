@@ -41,4 +41,3 @@
 ### Roadmap
 
 - add program shutdown/exit on the condition of not enough disk space
-- add resume support to downloading match id`s
