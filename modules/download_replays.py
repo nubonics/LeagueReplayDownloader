@@ -1,29 +1,64 @@
-from modules.download_single_replay import download_single_replay
+import asyncio
+import httpx
+
+from requests.auth import HTTPBasicAuth
+
 from modules.get_lockfile_data import get_lockfile_data
+from modules.leaky_bucket import AsyncLeakyBucket
 from modules.match_id_generator import match_id_generator
-from modules.tps_bucket import TPSBucket
+
+bucket = AsyncLeakyBucket(1, 0.015)
+client = httpx.AsyncClient(verify=False)
+
+
+async def get_metadata(base_url, gameId):
+    response = await client.get(f'{base_url}/v1/metadata/{gameId}')
+    return response.json()
+
+
+async def create_metadata(base_url, gameId):
+    await client.post(f'{base_url}/v2/metadata/{gameId}/create', json={})
+
+
+async def download_rp(base_url, gameId):
+    await client.post(f'{base_url}/v1/rofls/{gameId}/download/graceful', json={})
+
+
+async def download(base_url, gameId):
+    while True:
+        await bucket.acquire()
+        data = await get_metadata(base_url=base_url, gameId=gameId)
+        keys = data.keys()
+
+        if 'errorCode' in keys:
+            await bucket.acquire()
+            await create_metadata(base_url=base_url, gameId=gameId)
+        elif 'state' in keys:
+            state = data['state']
+            if state == 'download':
+                await bucket.acquire()
+                await download_rp(base_url=base_url, gameId=gameId)
+            elif state == 'lost' or state == 'incompatible' or state == 'watch':
+                break
+
+    print(f'DONE: gameId: {str(gameId)}')
 
 
 async def download_replays():
-    # Datadragon claims that LCU api is limited to 100 calls per second
-    # download_single_replay can take up to 4 calls
-    # 100 / 4 = 20 calls per second, lets use 16 calls per second to error on the side of caution
-    tps_bucket = TPSBucket(expected_tps=16)
-    tps_bucket.start()
+    lock_data = await get_lockfile_data()
+    client.auth = HTTPBasicAuth('riot', lock_data['remoting-auth-token'])
 
-    lockfile_data = await get_lockfile_data()
-    port = lockfile_data['app-port']
-    remote_auth_token = lockfile_data['remoting-auth-token']
+    base_url = f'https://127.0.0.1:{str(lock_data["app-port"])}/lol-replays'
 
-    match_ids = match_id_generator()
+    game_ids = match_id_generator()
 
-    # This needs some serious work... but should work for now...
+    tasks = list()
     try:
         while True:
-            if tps_bucket.get_token():
-                gameId = next(match_ids)
-                print(f'GameID: {str(gameId)}')
-                await download_single_replay(gameId=gameId, port=port, remote_auth_token=remote_auth_token)
-    except Exception as e:
-        print(e)
+            gameId = next(game_ids)
+            tasks.append(asyncio.create_task(download(base_url=base_url, gameId=gameId)))
+    except:
         pass
+
+    await asyncio.gather(*tasks)
+    await client.aclose()
