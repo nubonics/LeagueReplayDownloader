@@ -13,7 +13,8 @@ async def download_single_replay(gameId, port, remote_auth_token):
         check_replay_status_response_data = check_replay_status_response.json()
         check_replay_status_response_keys = check_replay_status_response_data.keys()
         if 'state' in check_replay_status_response_keys:
-            if check_replay_status_response_data['state'] == 'lost':
+            state = check_replay_status_response_data['state']
+            if state == 'lost' or state == 'incompatible':
                 return False
         elif 'errorCode' in check_replay_status_response_keys:
             await add_metadata(client=client, base_url=base_url, gameId=gameId)
@@ -32,7 +33,7 @@ async def wait_for_state(client, base_url, gameId, state1, state2):
             elif state2 is not None:
                 if response_data['state'] == state2:
                     return True
-        await asyncio.sleep(1)
+        await asyncio.sleep(12)
 
 
 async def check_replay_status(client, base_url, gameId):
